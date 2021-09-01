@@ -2,6 +2,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import triangle.Triangle;
+
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Scanner;
@@ -24,13 +25,13 @@ public class SimpleTest {
 
     @Test(dataProvider = "checkTriangle")
     public void testAssertCheckTriangle(double a, double b, double c) {
-        assert new Triangle(a, b, c).checkTriangle();
+        assertFalse(new Triangle(a, b, c).checkTriangle());
     }
 
     @Test(expectedExceptions = NumberFormatException.class)
     public void testAssertOutOfRange() {
         String str = "56611423635142524634664645";
-        assertTrue( new Triangle(Integer.parseInt(str), 7, 14).checkTriangle());
+        assertTrue(new Triangle(Integer.parseInt(str), 7, 14).checkTriangle());
     }
 
     @Test(expectedExceptions = NumberFormatException.class)
@@ -40,10 +41,20 @@ public class SimpleTest {
         sc.close();
     }
 
+    @DataProvider
+    public static Object[][] equilateralTriangle() {
+        return new Object[][]{
+                {5, 5, 5},
+                {123456789, 123456789, 123456789},
+                {987654.321, 987654.321, 987654.321},
+                {Math.pow(3, 50), Math.pow(3, 50), Math.pow(3, 50)},
+                {Math.pow(3, -50), Math.pow(3, -50), Math.pow(3, -50)},
+        };
+    }
 
-    @Test
-    public void testAssertEquilateral() {
-        assertEquals(new Triangle(5, 5, 5).detectTriangle(), 1);
+    @Test(dataProvider = "equilateralTriangle")
+    public void testAssertEquilateral(double a, double b, double c) {
+        Assert.assertEquals(new Triangle(a, b, c).detectTriangle(), 1);
     }
 
     @DataProvider
@@ -102,30 +113,26 @@ public class SimpleTest {
         Assert.assertEquals(new Triangle(a, b, c).detectTriangle(), 4);
     }
 
-    @Test
-    public void testAssertCheckSquareOfTriangleInt() {
-        assert (compareDoubles(9.798, new Triangle(4, 5, 7).getSquare(), 0.001));
+    @DataProvider
+    public static Object[][] checkSquareOfTriangle() {
+        return new Object[][]{
+                {4, 5, 7, 9.798},
+                {4.5, 4.5, 4.5, 8.769},
+                {Math.pow(3, 50), Math.pow(3, 50), Math.pow(3, 50), 2.231650127466815E47},
+                {Math.pow(3, -50), Math.pow(3, -50), Math.pow(3, -50), 8.40185464971763E-49}
+        };
+    }
+
+    @Test(dataProvider = "checkSquareOfTriangle")
+    public void testAssertCheckSquareOfTriangle(double a, double b, double c, double result) {
+        Assert.assertEquals(new Triangle(a, b, c).getSquare(), result);
     }
 
     @Test
-    public void testAssertCheckSquareOfTriangleDouble() {
-        assert (compareDoubles(8.769, new Triangle(4.5, 4.5, 4.5).getSquare(), 0.001));
+    public void testAssertOutOfRangeSquare() {
+        Triangle triangle = new Triangle(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+        assertNotEquals(triangle.getSquare(), Double.POSITIVE_INFINITY);
     }
 
-    public static boolean compareDoubles(double x, double y, double delta) {
-        return Math.abs(x - y) < delta;
-    }
-
-    @Test
-    public void testAssertCheckSquareOfTriangleBigNumbers() {
-        assertEquals(new Triangle(Math.pow(3, 50), Math.pow(3, 50), Math.pow(3, 50)).getSquare(),
-                2.231650127466815E47);
-    }
-
-    @Test
-    public void testAssertCheckSquareOfTriangleSmallNumbers() {
-        assertEquals(new Triangle(Math.pow(3, -50), Math.pow(3, -50), Math.pow(3, -50)).getSquare(),
-                8.40185464971763E-49);
-    }
 }
 
